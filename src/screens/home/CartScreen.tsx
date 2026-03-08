@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    FlatList,
-    TouchableOpacity,
-    ScrollView,
-} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useCartStore } from '../../store/cart.store';
 import apiClient from '../../lib/apiClient';
 
@@ -17,17 +11,11 @@ export default function CartScreen() {
         if (items.length === 0) return;
         setLoading(true);
         try {
-            // Group items by shop for multi-vendor (Simplified: process first shop's items only for MVP)
             const shopId = items[0].shopId;
             const orderItems = items
                 .filter((i) => i.shopId === shopId)
                 .map((i) => ({ productId: i.productId, quantity: i.quantity }));
-
-            await apiClient.post('/api/v1/orders', {
-                shopId,
-                items: orderItems,
-            });
-
+            await apiClient.post('/api/v1/orders', { shopId, items: orderItems });
             alert('Order placed successfully!');
             clearCart();
         } catch (err: any) {
@@ -39,20 +27,18 @@ export default function CartScreen() {
 
     if (items.length === 0) {
         return (
-            <View className="flex-1 items-center justify-center bg-surface px-6">
-                <Text className="text-6xl mb-4">🛒</Text>
-                <Text className="text-2xl font-bold text-white">Your cart is empty</Text>
-                <Text className="mt-2 text-center text-gray-400">
-                    Looks like you haven't added anything to your cart yet.
-                </Text>
+            <View style={styles.emptyRoot}>
+                <Text style={styles.emptyIcon}>🛒</Text>
+                <Text style={styles.emptyTitle}>Your cart is empty</Text>
+                <Text style={styles.emptySub}>Looks like you haven't added anything to your cart yet.</Text>
             </View>
         );
     }
 
     return (
-        <View className="flex-1 bg-surface">
-            <View className="bg-card px-6 pb-6 pt-14">
-                <Text className="text-2xl font-bold text-white">My Shopping Cart</Text>
+        <View style={styles.root}>
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>My Shopping Cart</Text>
             </View>
 
             <FlatList
@@ -60,61 +46,51 @@ export default function CartScreen() {
                 keyExtractor={(item) => item.productId}
                 contentContainerStyle={{ padding: 16 }}
                 renderItem={({ item }) => (
-                    <View className="mb-4 flex-row items-center rounded-2xl bg-card p-4 shadow-sm">
-                        <View className="h-16 w-16 items-center justify-center rounded-xl bg-surface">
-                            <Text className="text-2xl">📦</Text>
+                    <View style={styles.cartItem}>
+                        <View style={styles.itemIconBox}>
+                            <Text style={styles.itemIcon}>📦</Text>
                         </View>
-                        <View className="ml-4 flex-1">
-                            <Text className="text-sm font-semibold text-brand">
-                                {item.shopName}
-                            </Text>
-                            <Text className="text-base font-bold text-white">{item.name}</Text>
-                            <Text className="mt-1 text-lg font-bold text-white">
-                                ${(item.price * item.quantity).toFixed(2)}
-                            </Text>
+                        <View style={styles.itemInfo}>
+                            <Text style={styles.itemShop}>{item.shopName}</Text>
+                            <Text style={styles.itemName}>{item.name}</Text>
+                            <Text style={styles.itemPrice}>${(item.price * item.quantity).toFixed(2)}</Text>
                         </View>
-                        <View className="items-center">
-                            <View className="flex-row items-center rounded-xl bg-surface px-2 py-1">
+                        <View style={styles.qtyWrap}>
+                            <View style={styles.qtyRow}>
                                 <TouchableOpacity
                                     onPress={() => updateQuantity(item.productId, item.quantity - 1)}
-                                    className="h-8 w-8 items-center justify-center"
+                                    style={styles.qtyBtn}
                                 >
-                                    <Text className="text-xl text-brand">-</Text>
+                                    <Text style={styles.qtyBtnText}>-</Text>
                                 </TouchableOpacity>
-                                <Text className="mx-3 font-bold text-white">{item.quantity}</Text>
+                                <Text style={styles.qtyNum}>{item.quantity}</Text>
                                 <TouchableOpacity
                                     onPress={() => updateQuantity(item.productId, item.quantity + 1)}
-                                    className="h-8 w-8 items-center justify-center"
+                                    style={styles.qtyBtn}
                                 >
-                                    <Text className="text-xl text-brand">+</Text>
+                                    <Text style={styles.qtyBtnText}>+</Text>
                                 </TouchableOpacity>
                             </View>
-                            <TouchableOpacity
-                                onPress={() => removeItem(item.productId)}
-                                className="mt-2"
-                            >
-                                <Text className="text-xs text-gray-500">Remove</Text>
+                            <TouchableOpacity onPress={() => removeItem(item.productId)} style={styles.removeBtn}>
+                                <Text style={styles.removeText}>Remove</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 )}
             />
 
-            {/* Checkout Footer */}
-            <View className="border-t border-border bg-card p-6 pb-8">
-                <View className="mb-4 flex-row items-center justify-between">
-                    <Text className="text-lg text-gray-400">Total Amount</Text>
-                    <Text className="text-2xl font-bold text-white">
-                        ${total.toFixed(2)}
-                    </Text>
+            <View style={styles.footer}>
+                <View style={styles.totalRow}>
+                    <Text style={styles.totalLabel}>Total Amount</Text>
+                    <Text style={styles.totalAmount}>${total.toFixed(2)}</Text>
                 </View>
                 <TouchableOpacity
-                    className="items-center rounded-2xl bg-brand py-4"
+                    style={styles.checkoutBtn}
                     activeOpacity={0.85}
                     onPress={handleCheckout}
                     disabled={loading}
                 >
-                    <Text className="text-lg font-bold text-white">
+                    <Text style={styles.checkoutText}>
                         {loading ? 'Processing...' : 'Checkout Now'}
                     </Text>
                 </TouchableOpacity>
@@ -122,3 +98,35 @@ export default function CartScreen() {
         </View>
     );
 }
+
+const C = { surface: '#0F0F0F', card: '#1A1A1A', border: '#2A2A2A', brand: '#C0392B', white: '#FFFFFF', gray400: '#9CA3AF', gray500: '#6B7280' };
+
+const styles = StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.surface },
+    emptyRoot: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: C.surface, paddingHorizontal: 24 },
+    emptyIcon: { fontSize: 64, marginBottom: 16 },
+    emptyTitle: { fontSize: 24, fontWeight: 'bold', color: C.white },
+    emptySub: { marginTop: 8, textAlign: 'center', color: C.gray400 },
+    header: { backgroundColor: C.card, paddingHorizontal: 24, paddingBottom: 24, paddingTop: 56 },
+    headerTitle: { fontSize: 24, fontWeight: 'bold', color: C.white },
+    cartItem: { marginBottom: 16, flexDirection: 'row', alignItems: 'center', borderRadius: 16, backgroundColor: C.card, padding: 16 },
+    itemIconBox: { height: 64, width: 64, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: C.surface },
+    itemIcon: { fontSize: 24 },
+    itemInfo: { marginLeft: 16, flex: 1 },
+    itemShop: { fontSize: 14, fontWeight: '600', color: C.brand },
+    itemName: { fontSize: 16, fontWeight: 'bold', color: C.white },
+    itemPrice: { marginTop: 4, fontSize: 18, fontWeight: 'bold', color: C.white },
+    qtyWrap: { alignItems: 'center' },
+    qtyRow: { flexDirection: 'row', alignItems: 'center', borderRadius: 12, backgroundColor: C.surface, paddingHorizontal: 8, paddingVertical: 4 },
+    qtyBtn: { height: 32, width: 32, alignItems: 'center', justifyContent: 'center' },
+    qtyBtnText: { fontSize: 20, color: C.brand },
+    qtyNum: { marginHorizontal: 12, fontWeight: 'bold', color: C.white },
+    removeBtn: { marginTop: 8 },
+    removeText: { fontSize: 12, color: C.gray500 },
+    footer: { borderTopWidth: 1, borderTopColor: C.border, backgroundColor: C.card, padding: 24, paddingBottom: 32 },
+    totalRow: { marginBottom: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    totalLabel: { fontSize: 18, color: C.gray400 },
+    totalAmount: { fontSize: 24, fontWeight: 'bold', color: C.white },
+    checkoutBtn: { alignItems: 'center', borderRadius: 16, backgroundColor: C.brand, paddingVertical: 16 },
+    checkoutText: { fontSize: 18, fontWeight: 'bold', color: C.white },
+});

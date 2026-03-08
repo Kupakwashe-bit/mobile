@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    FlatList,
-    ActivityIndicator,
-    TouchableOpacity,
-} from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import apiClient from '../../lib/apiClient';
 import ShopCard from '../../components/ShopCard';
@@ -20,34 +14,26 @@ export default function ShopsScreen() {
         try {
             const { data } = await apiClient.get('/api/v1/shops');
             setShops(data);
-        } catch (err) {
-            console.error('Failed to fetch shops', err);
-        } finally {
-            setLoading(false);
-        }
+        } catch (err) { console.error('Failed to fetch shops', err); }
+        finally { setLoading(false); }
     };
 
-    useEffect(() => {
-        fetchShops();
-    }, []);
+    useEffect(() => { fetchShops(); }, []);
 
     return (
-        <View className="flex-1 bg-surface">
-            <View className="bg-card px-6 pb-6 pt-14 flex-row items-center justify-between">
+        <View style={styles.root}>
+            <View style={styles.header}>
                 <View>
-                    <Text className="text-2xl font-bold text-white">Local Shops</Text>
-                    <Text className="text-sm text-gray-400">Discover vendors near you</Text>
+                    <Text style={styles.headerTitle}>Local Shops</Text>
+                    <Text style={styles.headerSub}>Discover vendors near you</Text>
                 </View>
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    className="h-10 w-10 items-center justify-center rounded-full bg-surface"
-                >
-                    <Text className="text-white font-bold">✕</Text>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
+                    <Text style={styles.closeBtnText}>✕</Text>
                 </TouchableOpacity>
             </View>
 
             {loading ? (
-                <View className="flex-1 items-center justify-center">
+                <View style={styles.loadingWrap}>
                     <ActivityIndicator color="#C0392B" size="large" />
                 </View>
             ) : (
@@ -62,8 +48,8 @@ export default function ShopsScreen() {
                         />
                     )}
                     ListEmptyComponent={
-                        <View className="mt-20 items-center">
-                            <Text className="text-gray-500">No shops available right now.</Text>
+                        <View style={styles.emptyWrap}>
+                            <Text style={styles.emptyText}>No shops available right now.</Text>
                         </View>
                     }
                 />
@@ -71,3 +57,17 @@ export default function ShopsScreen() {
         </View>
     );
 }
+
+const C = { surface: '#0F0F0F', card: '#1A1A1A', white: '#FFFFFF', gray400: '#9CA3AF', gray500: '#6B7280' };
+
+const styles = StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.surface },
+    header: { backgroundColor: C.card, paddingHorizontal: 24, paddingBottom: 24, paddingTop: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    headerTitle: { fontSize: 24, fontWeight: 'bold', color: C.white },
+    headerSub: { fontSize: 14, color: C.gray400 },
+    closeBtn: { height: 40, width: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 20, backgroundColor: C.surface },
+    closeBtnText: { color: C.white, fontWeight: 'bold' },
+    loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    emptyWrap: { marginTop: 80, alignItems: 'center' },
+    emptyText: { color: C.gray500 },
+});

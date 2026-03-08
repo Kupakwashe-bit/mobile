@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { API_BASE_URL } from '../../config/api';
 import { useAuthStore } from '../../store/auth.store';
 import axios from 'axios';
 
 export default function AdminDashboardScreen() {
-    const { accessToken, user } = useAuthStore();
+    const { accessToken } = useAuthStore();
     const [orders, setOrders] = useState<any[]>([]);
 
-    useEffect(() => {
-        fetchOrders();
-    }, []);
+    useEffect(() => { fetchOrders(); }, []);
 
     const fetchOrders = async () => {
         try {
@@ -18,53 +16,60 @@ export default function AdminDashboardScreen() {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             setOrders(res.data);
-        } catch (err) {
-            console.error('Failed to load orders', err);
-        }
+        } catch (err) { console.error('Failed to load orders', err); }
     };
 
     const updateOrderStatus = async (orderId: string, currentStatus: string) => {
         const statuses = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'ON_WAY', 'DELIVERED', 'CANCELLED'];
-        const nextIndex = (statuses.indexOf(currentStatus) + 1) % statuses.length;
-        const nextStatus = statuses[nextIndex];
-
+        const nextStatus = statuses[(statuses.indexOf(currentStatus) + 1) % statuses.length];
         try {
             await axios.patch(`${API_BASE_URL}/api/v1/orders/${orderId}/status`, { status: nextStatus }, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             fetchOrders();
-            Alert.alert("Success", `Order status updated to ${nextStatus}`);
-        } catch (err) {
-            Alert.alert("Error", "Failed to update status");
-        }
+            Alert.alert('Success', `Order status updated to ${nextStatus}`);
+        } catch { Alert.alert('Error', 'Failed to update status'); }
     };
 
     return (
-        <View className="flex-1 bg-background p-4">
-            <Text className="text-2xl font-bold text-white mb-4">Admin Dashboard</Text>
-
+        <View style={styles.root}>
+            <Text style={styles.title}>Admin Dashboard</Text>
             <FlatList
                 data={orders}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
-                    <View className="bg-surface p-4 rounded-xl mb-4 border border-gray-800">
-                        <Text className="text-white font-bold text-lg mb-2">Order: {item.id}</Text>
-                        <Text className="text-gray-400 mb-1">Customer: {item.customer?.email || item.customerId}</Text>
-                        <Text className="text-gray-400 mb-3">Total: ${item.totalAmount}</Text>
-
-                        <View className="flex-row items-center justify-between">
-                            <Text className="text-primary font-semibold">{item.status}</Text>
+                    <View style={styles.orderCard}>
+                        <Text style={styles.orderId}>Order: {item.id}</Text>
+                        <Text style={styles.orderInfo}>Customer: {item.customer?.email || item.customerId}</Text>
+                        <Text style={styles.orderInfo}>Total: ${item.totalAmount}</Text>
+                        <View style={styles.orderFooter}>
+                            <Text style={styles.orderStatus}>{item.status}</Text>
                             <TouchableOpacity
-                                className="bg-primary/20 px-4 py-2 rounded-lg border border-primary/50"
+                                style={styles.nextStatusBtn}
                                 onPress={() => updateOrderStatus(item.id, item.status)}
                             >
-                                <Text className="text-primary font-medium">Next Status</Text>
+                                <Text style={styles.nextStatusText}>Next Status</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 )}
-                ListEmptyComponent={<Text className="text-gray-400">No orders found.</Text>}
+                ListEmptyComponent={<Text style={styles.emptyText}>No orders found.</Text>}
             />
         </View>
     );
 }
+
+const C = { surface: '#0F0F0F', card: '#1A1A1A', brand: '#C0392B', white: '#FFFFFF', gray400: '#9CA3AF' };
+
+const styles = StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.surface, padding: 16, paddingTop: 56 },
+    title: { fontSize: 24, fontWeight: 'bold', color: C.white, marginBottom: 16 },
+    orderCard: { backgroundColor: C.card, padding: 16, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: '#374151' },
+    orderId: { color: C.white, fontWeight: 'bold', fontSize: 18, marginBottom: 8 },
+    orderInfo: { color: C.gray400, marginBottom: 4 },
+    orderFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
+    orderStatus: { color: C.brand, fontWeight: '600' },
+    nextStatusBtn: { backgroundColor: 'rgba(192,57,43,0.2)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(192,57,43,0.5)' },
+    nextStatusText: { color: C.brand, fontWeight: '500' },
+    emptyText: { color: C.gray400 },
+});

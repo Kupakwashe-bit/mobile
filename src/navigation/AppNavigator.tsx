@@ -74,8 +74,8 @@ export default function AppNavigator() {
 
 function PlaceholderScreen({ route }: any) {
     return (
-        <View className="flex-1 items-center justify-center bg-surface">
-            <Text className="text-xl font-bold text-white">{route.name} Coming Soon</Text>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0F0F0F' }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FFFFFF' }}>{route.name} Coming Soon</Text>
         </View>
     );
 }

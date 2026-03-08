@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    ScrollView,
-    TouchableOpacity,
-    ActivityIndicator,
-} from 'react-native';
-import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import apiClient from '../../lib/apiClient';
 import { useCartStore } from '../../store/cart.store';
 
@@ -23,59 +17,82 @@ export default function ProductDetailScreen() {
             try {
                 const { data } = await apiClient.get(`/api/v1/products/${productId}`);
                 setProduct(data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
+            } catch (err) { console.error(err); }
+            finally { setLoading(false); }
         };
         fetchProduct();
     }, [productId]);
 
-    if (loading) return <ActivityIndicator className="flex-1" color="#C0392B" />;
-    if (!product) return <View className="flex-1 items-center justify-center"><Text>Product not found</Text></View>;
+    if (loading) {
+        return (
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color="#C0392B" />
+            </View>
+        );
+    }
+    if (!product) {
+        return (
+            <View style={styles.centered}>
+                <Text style={styles.notFound}>Product not found</Text>
+            </View>
+        );
+    }
 
     return (
-        <View className="flex-1 bg-surface">
+        <View style={styles.root}>
             <ScrollView>
-                <View className="h-80 w-full bg-card items-center justify-center">
-                    <Text className="text-9xl">🛍️</Text>
+                <View style={styles.imageBox}>
+                    <Text style={styles.imageEmoji}>🛍️</Text>
                 </View>
 
-                <View className="p-6">
-                    <Text className="text-sm font-semibold text-brand uppercase tracking-widest">
-                        {product.shop.name}
-                    </Text>
-                    <Text className="mt-2 text-3xl font-bold text-white">
-                        {product.name}
-                    </Text>
-                    <Text className="mt-3 text-2xl font-bold text-white">
-                        ${Number(product.price).toFixed(2)}
-                    </Text>
+                <View style={styles.details}>
+                    <Text style={styles.shopName}>{product.shop.name}</Text>
+                    <Text style={styles.productName}>{product.name}</Text>
+                    <Text style={styles.price}>${Number(product.price).toFixed(2)}</Text>
 
-                    <View className="mt-6 border-t border-border pt-6">
-                        <Text className="text-lg font-bold text-white">Description</Text>
-                        <Text className="mt-2 text-base leading-6 text-gray-400">
+                    <View style={styles.descSection}>
+                        <Text style={styles.descTitle}>Description</Text>
+                        <Text style={styles.descText}>
                             {product.description || 'No description provided for this premium item.'}
                         </Text>
                     </View>
                 </View>
             </ScrollView>
 
-            {/* Footer / Add to Cart */}
-            <View className="border-t border-border bg-card px-6 py-4 pb-8">
+            <View style={styles.footer}>
                 <TouchableOpacity
-                    className="flex-row items-center justify-center rounded-2xl bg-brand py-4 shadow-lg"
+                    style={styles.addToCartBtn}
                     activeOpacity={0.9}
                     onPress={() => {
                         addItem(product, product.shop);
                         navigation.navigate('HomeTabs', { screen: 'Cart' });
                     }}
                 >
-                    <Text className="text-xl mr-2">🛒</Text>
-                    <Text className="text-lg font-bold text-white">Add to Cart</Text>
+                    <Text style={styles.cartIcon}>🛒</Text>
+                    <Text style={styles.addToCartText}>Add to Cart</Text>
                 </TouchableOpacity>
             </View>
         </View>
     );
 }
+
+const C = { surface: '#0F0F0F', card: '#1A1A1A', border: '#2A2A2A', brand: '#C0392B', white: '#FFFFFF', gray400: '#9CA3AF' };
+
+const styles = StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.surface },
+    centered: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: C.surface },
+    notFound: { color: C.white, fontSize: 16 },
+    imageBox: { height: 320, width: '100%', backgroundColor: C.card, alignItems: 'center', justifyContent: 'center' },
+    imageEmoji: { fontSize: 80 },
+    details: { padding: 24 },
+    shopName: { fontSize: 14, fontWeight: '600', color: C.brand, textTransform: 'uppercase', letterSpacing: 1 },
+    productName: { marginTop: 8, fontSize: 28, fontWeight: 'bold', color: C.white },
+    price: { marginTop: 12, fontSize: 24, fontWeight: 'bold', color: C.white },
+    descSection: { marginTop: 24, borderTopWidth: 1, borderTopColor: C.border, paddingTop: 24 },
+    descTitle: { fontSize: 18, fontWeight: 'bold', color: C.white },
+    descText: { marginTop: 8, fontSize: 16, lineHeight: 24, color: C.gray400 },
+    footer: { borderTopWidth: 1, borderTopColor: C.border, backgroundColor: C.card, paddingHorizontal: 24, paddingVertical: 16, paddingBottom: 32 },
+    addToCartBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: C.brand, paddingVertical: 16 },
+    cartIcon: { fontSize: 20, marginRight: 8 },
+    addToCartText: { fontSize: 18, fontWeight: 'bold', color: C.white },
+});

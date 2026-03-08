@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
+    View, Text, TextInput, TouchableOpacity, ActivityIndicator,
+    Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
@@ -24,52 +17,34 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
 
     const handleLogin = async () => {
-        if (!email || !password) {
-            Alert.alert('Error', 'Please fill in all fields.');
-            return;
-        }
-        try {
-            await login(email, password);
-        } catch (err: any) {
-            Alert.alert('Login Failed', err.message);
-        }
+        if (!email || !password) { Alert.alert('Error', 'Please fill in all fields.'); return; }
+        try { await login(email, password); } catch (err: any) { Alert.alert('Login Failed', err.message); }
     };
 
     return (
         <KeyboardAvoidingView
-            className="flex-1 bg-surface"
+            style={styles.root}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <ScrollView
-                contentContainerStyle={{ flexGrow: 1 }}
-                keyboardShouldPersistTaps="handled"
-            >
-                <View className="flex-1 justify-center px-6 pb-12">
-                    {/* Logo / Header */}
-                    <View className="mb-12 items-center">
-                        <View className="mb-4 h-20 w-20 items-center justify-center rounded-3xl bg-brand">
-                            <Text className="text-4xl font-bold text-white">V</Text>
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+                <View style={styles.inner}>
+                    {/* Logo */}
+                    <View style={styles.logoWrap}>
+                        <View style={styles.logoBox}>
+                            <Text style={styles.logoChar}>V</Text>
                         </View>
-                        <Text className="text-4xl font-bold tracking-tight text-white">
-                            VenCapital
-                        </Text>
-                        <Text className="mt-2 text-base text-gray-400">
-                            Your multi-vendor marketplace
-                        </Text>
+                        <Text style={styles.appName}>VenCapital</Text>
+                        <Text style={styles.appSub}>Your multi-vendor marketplace</Text>
                     </View>
 
                     {/* Form Card */}
-                    <View className="rounded-3xl bg-card p-6 shadow-lg">
-                        <Text className="mb-6 text-2xl font-bold text-white">
-                            Welcome back
-                        </Text>
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>Welcome back</Text>
 
-                        <View className="mb-4">
-                            <Text className="mb-2 text-sm font-medium text-gray-400">
-                                Email
-                            </Text>
+                        <View style={styles.fieldWrap}>
+                            <Text style={styles.label}>Email</Text>
                             <TextInput
-                                className="rounded-xl border border-border bg-surface px-4 py-3.5 text-base text-white"
+                                style={styles.input}
                                 placeholder="you@example.com"
                                 placeholderTextColor="#555"
                                 keyboardType="email-address"
@@ -79,12 +54,10 @@ export default function LoginScreen() {
                             />
                         </View>
 
-                        <View className="mb-6">
-                            <Text className="mb-2 text-sm font-medium text-gray-400">
-                                Password
-                            </Text>
+                        <View style={styles.fieldWrapLast}>
+                            <Text style={styles.label}>Password</Text>
                             <TextInput
-                                className="rounded-xl border border-border bg-surface px-4 py-3.5 text-base text-white"
+                                style={styles.input}
                                 placeholder="••••••••"
                                 placeholderTextColor="#555"
                                 secureTextEntry
@@ -94,26 +67,23 @@ export default function LoginScreen() {
                         </View>
 
                         <TouchableOpacity
-                            className="items-center rounded-xl bg-brand py-4"
+                            style={styles.submitBtn}
                             onPress={handleLogin}
                             disabled={isLoading}
                             activeOpacity={0.85}
                         >
-                            {isLoading ? (
-                                <ActivityIndicator color="#fff" />
-                            ) : (
-                                <Text className="text-base font-bold text-white">
-                                    Sign In
-                                </Text>
-                            )}
+                            {isLoading
+                                ? <ActivityIndicator color="#fff" />
+                                : <Text style={styles.submitText}>Sign In</Text>
+                            }
                         </TouchableOpacity>
                     </View>
 
                     {/* Footer */}
-                    <View className="mt-6 flex-row items-center justify-center">
-                        <Text className="text-gray-400">Don't have an account? </Text>
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>Don't have an account? </Text>
                         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                            <Text className="font-semibold text-brand">Sign Up</Text>
+                            <Text style={styles.footerLink}>Sign Up</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -121,3 +91,26 @@ export default function LoginScreen() {
         </KeyboardAvoidingView>
     );
 }
+
+const C = { surface: '#0F0F0F', card: '#1A1A1A', border: '#2A2A2A', brand: '#C0392B', white: '#FFFFFF', gray400: '#9CA3AF' };
+
+const styles = StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.surface },
+    inner: { flex: 1, justifyContent: 'center', paddingHorizontal: 24, paddingBottom: 48 },
+    logoWrap: { marginBottom: 48, alignItems: 'center' },
+    logoBox: { marginBottom: 16, height: 80, width: 80, alignItems: 'center', justifyContent: 'center', borderRadius: 24, backgroundColor: C.brand },
+    logoChar: { fontSize: 36, fontWeight: 'bold', color: C.white },
+    appName: { fontSize: 36, fontWeight: 'bold', color: C.white },
+    appSub: { marginTop: 8, fontSize: 16, color: C.gray400 },
+    card: { borderRadius: 24, backgroundColor: C.card, padding: 24 },
+    cardTitle: { marginBottom: 24, fontSize: 22, fontWeight: 'bold', color: C.white },
+    fieldWrap: { marginBottom: 16 },
+    fieldWrapLast: { marginBottom: 24 },
+    label: { marginBottom: 8, fontSize: 14, fontWeight: '500', color: C.gray400 },
+    input: { borderRadius: 12, borderWidth: 1, borderColor: C.border, backgroundColor: C.surface, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: C.white },
+    submitBtn: { alignItems: 'center', borderRadius: 12, backgroundColor: C.brand, paddingVertical: 16 },
+    submitText: { fontSize: 16, fontWeight: 'bold', color: C.white },
+    footer: { marginTop: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+    footerText: { color: C.gray400 },
+    footerLink: { fontWeight: '600', color: C.brand },
+});
