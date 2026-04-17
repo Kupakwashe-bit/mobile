@@ -6,6 +6,7 @@ import CartScreen from '../screens/home/CartScreen';
 import ProductDetailScreen from '../screens/home/ProductDetailScreen';
 import ShopsScreen from '../screens/home/ShopsScreen';
 import OrderTrackingScreen from '../screens/home/OrderTrackingScreen';
+import OrderHistoryScreen from '../screens/home/OrderHistoryScreen';
 import AdminDashboardScreen from '../screens/home/AdminDashboardScreen';
 import { View, Text } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -66,6 +67,7 @@ export default function AppNavigator() {
             <Stack.Screen name="HomeTabs" component={HomeTabs} />
             <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
             <Stack.Screen name="Shops" component={ShopsScreen} />
+            <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
             <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
             <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
         </Stack.Navigator>

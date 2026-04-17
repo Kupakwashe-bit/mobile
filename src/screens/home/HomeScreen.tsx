@@ -13,7 +13,7 @@ export default function HomeScreen() {
             case 'Cart': navigation.navigate('Cart'); break;
             case 'Explore': navigation.navigate('Explore'); break;
             case 'Profile': navigation.navigate('Profile'); break;
-            case 'Orders': navigation.navigate('OrderTracking'); break;
+            case 'Orders': navigation.navigate('OrderHistory'); break;
             case 'Admin': navigation.navigate('AdminDashboard'); break;
             default: break;
         }
@@ -31,7 +31,7 @@ export default function HomeScreen() {
                                 {user?.email?.split('@')[0] ?? 'User'}
                             </Text>
                         </View>
-                        <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
+                        <TouchableOpacity onPress={() => logout()} style={styles.logoutBtn}>
                             <Text style={styles.logoutText}>Logout</Text>
                         </TouchableOpacity>
                     </View>
